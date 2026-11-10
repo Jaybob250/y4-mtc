@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10152d">
+<title>MTC ARCADE</title>
+<style>
+:root{--bg:#10152d;--panel:#1b2345;--panel2:#252f5b;--cyan:#55e5ff;--pink:#ff6fcf;--yellow:#ffe27a;--text:#f7f8ff;--muted:#b8c2e8;--green:#78f0ae}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 0%,#26386b 0,#10152d 48%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;display:flex;justify-content:center}
+button,input{font:inherit}button{border:0;border-radius:15px;padding:13px 18px;font-weight:800;color:#10152d;background:var(--cyan);cursor:pointer;box-shadow:0 4px 0 #1d9db8;touch-action:manipulation}button:active{transform:translateY(2px);box-shadow:0 2px 0 #1d9db8}button.secondary{background:#394777;color:white;box-shadow:0 4px 0 #20294b}button.pink{background:var(--pink);box-shadow:0 4px 0 #b83c8c}button:disabled{opacity:.45;cursor:not-allowed}
+.app{width:min(100%,650px);padding:18px 16px 36px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-size:clamp(24px,6vw,34px);font-weight:1000;letter-spacing:1px}.brand span{color:var(--cyan)}.settings{padding:10px 13px;font-size:14px}
+.panel{background:linear-gradient(145deg,var(--panel),#171e3b);border:1px solid #394777;border-radius:24px;padding:22px;margin-top:18px;box-shadow:0 12px 35px #05081766}
+h1,h2,p{margin-top:0}h1{font-size:30px;margin-bottom:8px}h2{font-size:23px;margin-bottom:10px}.muted{color:var(--muted)}.center{text-align:center}.big{font-size:clamp(38px,11vw,64px);font-weight:1000;letter-spacing:1px;margin:18px 0}.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.row>*{flex:1;min-width:110px}.stats{display:flex;justify-content:space-between;color:var(--muted);font-weight:700;font-size:14px}.answer-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}.answer-grid button{font-size:23px;padding:18px}.feedback{min-height:30px;margin-top:14px;font-weight:800}.progress{height:9px;border-radius:99px;background:#303b68;overflow:hidden;margin:14px 0}.progress>div{height:100%;background:linear-gradient(90deg,var(--cyan),var(--pink));width:0;transition:width .2s}
+.game-target{font-size:62px;background:#303b68;border:2px solid var(--cyan);border-radius:22px;width:110px;height:110px;display:grid;place-items:center;margin:18px auto;box-shadow:0 0 25px #55e5ff44}
+input{width:100%;padding:14px;border-radius:13px;border:2px solid #52649b;background:#0e1430;color:white;margin:8px 0 14px;outline:none}input:focus{border-color:var(--cyan)}
+.hidden{display:none!important}.tiny{font-size:12px;color:var(--muted);line-height:1.5}.pill{display:inline-block;border-radius:99px;background:#303b68;color:var(--cyan);padding:6px 11px;font-size:12px;font-weight:800}
+.setting-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #394777}.setting-row:last-child{border:0}
+@media(max-width:380px){.panel{padding:17px}.answer-grid button{padding:15px}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="brand">MTC <span>ARCADE</span></div>
+    <button class="secondary settings" id="settingsBtn">⚙ Settings</button>
+  </header>
+
+  <section id="home" class="panel center">
+    <div class="pill">YEAR 4 MULTIPLICATION PRACTICE</div>
+    <h1 style="margin-top:16px">Ready, player?</h1>
+    <p class="muted">Answer a multiplication question, then earn an arcade break. Repeat and build your streak!</p>
+    <div class="big">× ✦ 🚀</div>
+    <div class="row">
+      <button id="startBtn">Start playing</button>
+      <button class="secondary" id="howBtn">How to play</button>
+    </div>
+    <p class="tiny" style="margin:18px 0 0">Practise tables from 2× to 12×. No account needed. Your score stays on this device while the page is open.</p>
+  </section>
+
+  <section id="how" class="panel hidden">
+    <h2>How to play</h2>
+    <p>1. Solve a multiplication question.</p><p>2. Choose the correct answer from four options.</p><p>3. Play a quick star-tap mini-game between questions.</p><p>4. Keep going to improve your score and streak.</p>
+    <button id="backHomeBtn" class="secondary">Back</button>
+  </section>
+
+  <section id="quiz" class="panel hidden center">
+    <div class="stats"><span id="questionCount">Question 1</span><span>⭐ <span id="score">0</span></span><span>🔥 <span id="streak">0</span></span></div>
+    <div class="progress"><div id="progressBar"></div></div>
+    <p class="muted">What is...</p>
+    <div class="big" id="question">7 × 8</div>
+    <div class="answer-grid" id="answers"></div>
+    <div class="feedback" id="quizFeedback" aria-live="polite"></div>
+  </section>
+
+  <section id="mini" class="panel center hidden">
+    <div class="pill">ARCADE BREAK</div>
+    <h2 id="miniTitle">Star tap!</h2>
+    <p class="muted" id="miniText">Tap the star as many times as you can in 8 seconds.</p>
+    <div class="game-target" id="target">⭐</div>
+    <div class="big" style="font-size:38px" id="miniScore">0</div>
+    <p class="muted" id="miniTimer">Ready?</p>
+    <button id="miniStartBtn">Start mini-game</button>
+    <button id="nextQuestionBtn" class="hidden">Next question →</button>
+  </section>
+
+  <section id="settings" class="panel hidden">
+    <h2>⚙ Settings</h2>
+    <div class="setting-row"><span>Sound effects</span><button class="secondary" id="soundBtn">Off</button></div>
+    <div class="setting-row"><span>Question pace</span><button class="secondary" id="paceBtn">Standard</button></div>
+    <div class="setting-row"><span>Developer Options</span><button class="pink" id="devBtn">Open</button></div>
+    <p class="tiny">Developer Options needs two taps before the code screen appears.</p>
+    <button class="secondary" id="settingsBackBtn">Back to game</button>
+  </section>
+
+  <section id="code" class="panel hidden">
+    <h2>🔐 Developer Options</h2>
+    <p class="muted">Enter the developer access code.</p>
+    <input id="codeInput" type="password" inputmode="numeric" placeholder="Access code" autocomplete="off">
+    <button id="codeSubmit">Unlock</button>
+    <button class="secondary" id="codeCancel">Cancel</button>
+    <p class="feedback" id="codeFeedback"></p>
+  </section>
+
+  <section id="teacher" class="panel hidden center">
+    <h2>Are you a teacher?</h2>
+    <p class="muted">Choose an answer to continue.</p>
+    <div class="row"><button id="teacherYes">Yes</button><button class="pink" id="teacherNo">No</button></div>
+    <p class="feedback" id="teacherFeedback"></p>
+  </section>
+
+  <section id="complete" class="panel center hidden">
+    <div class="big">🏆</div><h1>Great session!</h1>
+    <p class="muted" id="finalStats"></p>
+    <button id="playAgainBtn">Play again</button>
+    <button class="secondary" id="homeBtn">Home</button>
+  </section>
+
+  <section id="mathRemoved" class="panel center hidden">
+    <div class="big">🎮</div>
+    <h1>Arcade mode</h1>
+    <p class="muted">Maths questions have been removed from this session. You can still play the mini-game.</p>
+    <button id="arcadePlayBtn">Play star tap</button>
+    <button class="secondary" id="arcadeHomeBtn">Home</button>
+  </section>
+</main>
+<script>
+const screens=['home','how','quiz','mini','settings','code','teacher','complete','mathRemoved'];
+const $=id=>document.getElementById(id);
+let score=0, streak=0, questionNo=0, currentAnswer=0, miniPoints=0, miniInterval=null, miniTime=8, sound=false, fast=false, mathEnabled=true, devTaps=0, devTapTimer=null;
+function show(name){screens.forEach(s=>$(s).classList.toggle('hidden',s!==name));}
+function setStats(){$('score').textContent=score;$('streak').textContent=streak;$('questionCount').textContent=`Question ${questionNo+1}`;$('progressBar').style.width=((questionNo%10)/10*100)+'%';}
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function makeQuestion(){
+ if(!mathEnabled){show('mathRemoved');return;}
+ questionNo++;let a=randInt(2,12),b=randInt(2,12);currentAnswer=a*b;
+ $('question').textContent=`${a} × ${b}`;$('quizFeedback').textContent='';setStats();
+ let opts=new Set([currentAnswer]);while(opts.size<4){let v=currentAnswer+randInt(-18,18);if(v>=0&&v!==currentAnswer)opts.add(v);}
+ let arr=[...opts].sort(()=>Math.random()-.5);$('answers').innerHTML='';
+ arr.forEach(v=>{let btn=document.createElement('button');btn.textContent=v;btn.addEventListener('click',()=>answer(v));$('answers').appendChild(btn);});
+ show('quiz');
+}
+function answer(v){
+ [...$('answers').children].forEach(b=>b.disabled=true);
+ if(v===currentAnswer){score+=1;streak++;$('quizFeedback').textContent='✓ Correct! Nice work!';}
+ else{streak=0;$('quizFeedback').textContent=`Not quite! The answer is ${currentAnswer}. Keep going!`;}
+ setStats();setTimeout(()=>startMini(),750);
+}
+function startMini(){miniPoints=0;miniTime=8;$('miniScore').textContent='0';$('miniTimer').textContent='8 seconds';$('target').textContent='⭐';$('miniStartBtn').classList.remove('hidden');$('nextQuestionBtn').classList.add('hidden');$('target').style.pointerEvents='none';show('mini');}
+function runMini(){
+ $('miniStartBtn').classList.add('hidden');$('target').style.pointerEvents='auto';$('miniTimer').textContent=miniTime+' seconds';
+ $('target').onclick=()=>{miniPoints++;$('miniScore').textContent=miniPoints;$('target').textContent=['⭐','💎','🚀','🌟'][randInt(0,3)];};
+ miniInterval=setInterval(()=>{miniTime--;$('miniTimer').textContent=miniTime+' seconds';if(miniTime<=0){clearInterval(miniInterval);$('target').style.pointerEvents='none';$('miniTimer').textContent=`Time! You collected ${miniPoints} stars.`;$('nextQuestionBtn').classList.remove('hidden');}},1000);
+}
+function openSettings(){show('settings');}
+$('startBtn').onclick=()=>{score=0;streak=0;questionNo=0;mathEnabled=true;makeQuestion();};
+$('howBtn').onclick=()=>show('how');$('backHomeBtn').onclick=()=>show('home');
+$('settingsBtn').onclick=openSettings;$('settingsBackBtn').onclick=()=>{if(mathEnabled&&questionNo>0)show('quiz');else show('home');};
+$('soundBtn').onclick=()=>{sound=!sound;$('soundBtn').textContent=sound?'On':'Off';};
+$('paceBtn').onclick=()=>{fast=!fast;$('paceBtn').textContent=fast?'Quick':'Standard';};
+$('devBtn').onclick=()=>{devTaps++;$('devBtn').textContent=devTaps===1?'Tap again':'Opening…';clearTimeout(devTapTimer);if(devTaps>=2){devTaps=0;$('codeInput').value='';$('codeFeedback').textContent='';show('code');}else{devTapTimer=setTimeout(()=>{$('devBtn').textContent='Open';devTaps=0;},1800);}};
+$('codeSubmit').onclick=()=>{if($('codeInput').value==='11142017'){show('teacher');$('codeFeedback').textContent='';}else{$('codeFeedback').textContent='Incorrect code. Try again.';}};
+$('codeInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('codeSubmit').click();});
+$('codeCancel').onclick=openSettings;
+$('teacherYes').onclick=()=>{$('teacherFeedback').textContent='Access granted.';};
+$('teacherNo').onclick=()=>{mathEnabled=false;$('teacherFeedback').textContent='Access granted.';setTimeout(()=>show('mathRemoved'),650);};
+$('miniStartBtn').onclick=runMini;
+$('nextQuestionBtn').onclick=()=>{if(questionNo>=10){$('finalStats').textContent=`You answered 10 questions and earned ${score} points, with ${streak} in your final streak.`;show('complete');}else makeQuestion();};
+$('playAgainBtn').onclick=()=>{$('startBtn').click();};$('homeBtn').onclick=()=>show('home');
+$('arcadePlayBtn').onclick=()=>startMini();$('arcadeHomeBtn').onclick=()=>show('home');
+</script>
+</body>
+</html>
